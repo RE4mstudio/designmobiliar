@@ -135,7 +135,7 @@ if (lightboxImages.length) {
     resetZoom();
     stageImage.classList.add('changing');
     window.setTimeout(() => {
-      stageImage.src = source.currentSrc || source.src;
+      stageImage.src = source.dataset.full || source.currentSrc || source.src;
       stageImage.alt = source.alt;
       stageImage.classList.remove('changing');
     }, 120);
@@ -246,4 +246,25 @@ if (lightboxImages.length) {
     if (event.key === 'ArrowLeft') showImage(activeIndex - 1);
     if (event.key === 'ArrowRight') showImage(activeIndex + 1);
   });
+}
+
+
+// Smooth product-image parallax (works with mouse, touch and reduced-motion settings).
+const parallaxImages = [...document.querySelectorAll('.product-mood-grid .reveal-image img')];
+if (parallaxImages.length) {
+  let parallaxTick = false;
+  const updateParallax = () => {
+    parallaxTick = false;
+    const viewH = window.innerHeight || document.documentElement.clientHeight;
+    parallaxImages.forEach((image) => {
+      const rect = image.parentElement.getBoundingClientRect();
+      if (rect.bottom < -120 || rect.top > viewH + 120) return;
+      const offset = ((rect.top + rect.height / 2 - viewH / 2) / viewH) * -42;
+      image.style.setProperty('--parallax-y', offset.toFixed(2) + 'px');
+    });
+  };
+  const requestParallax = () => { if (!parallaxTick) { parallaxTick = true; requestAnimationFrame(updateParallax); } };
+  window.addEventListener('scroll', requestParallax, { passive: true });
+  window.addEventListener('resize', requestParallax, { passive: true });
+  requestParallax();
 }

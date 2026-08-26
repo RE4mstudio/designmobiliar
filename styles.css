@@ -96,3 +96,11 @@ html{-webkit-tap-highlight-color:transparent}a,button,summary,[role="button"]{to
 .lightbox-image-wrap{touch-action:none;user-select:none;-webkit-user-select:none}
 .lightbox-stage img,.metro-gallery img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 .lightbox.open .lightbox-stage img.zoomed{pointer-events:none}
+
+/* Product-page closing CTA: dark green-black, no colour shift on hover */
+.product-back .button-light{background:var(--ink);color:#fff}.product-back .button-light:hover{background:var(--ink);color:#fff}
+.product-back .button-light .cta-arrow{display:inline-block;background-color:#fff;color:#fff;opacity:1}
+
+/* Smooth parallax on the wide product image, desktop and mobile */
+.product-mood-grid figure{overflow:hidden}
+.product-mood-grid .reveal-image img{height:calc(100% + 90px);max-height:none;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.02);transition:opacity 1s ease}
