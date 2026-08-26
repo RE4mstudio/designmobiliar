@@ -107,12 +107,24 @@ if (lightboxImages.length) {
   const zoomButton = lightbox.querySelector('.lightbox-zoom');
   let activeIndex = 0;
   let touchStartX = 0;
+  let panX = 0;
+  let panY = 0;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+  let panStartX = 0;
+  let panStartY = 0;
+  let isPanning = false;
+  let didDrag = false;
 
   function resetZoom() {
     stageImage.classList.remove('zoomed');
     zoomButton.classList.remove('active');
     zoomButton.setAttribute('aria-label', 'Bild vergrößern');
     stageImage.style.transformOrigin = '50% 50%';
+    panX = 0;
+    panY = 0;
+    stageImage.style.setProperty('--pan-x', '0px');
+    stageImage.style.setProperty('--pan-y', '0px');
   }
 
   function showImage(index) {
@@ -164,10 +176,46 @@ if (lightboxImages.length) {
     zoomButton.setAttribute('aria-label', zoomed ? 'Bild verkleinern' : 'Bild vergrößern');
   });
   stageImage.addEventListener('click', (event) => {
+    if (didDrag) {
+      didDrag = false;
+      return;
+    }
     const rect = stageImage.getBoundingClientRect();
     stageImage.style.transformOrigin = `${((event.clientX - rect.left) / rect.width) * 100}% ${((event.clientY - rect.top) / rect.height) * 100}%`;
     zoomButton.click();
   });
+  stageImage.addEventListener('pointerdown', (event) => {
+    if (!stageImage.classList.contains('zoomed')) return;
+    isPanning = true;
+    didDrag = false;
+    pointerStartX = event.clientX;
+    pointerStartY = event.clientY;
+    panStartX = panX;
+    panStartY = panY;
+    stageImage.setPointerCapture?.(event.pointerId);
+    stageImage.classList.add('panning');
+  });
+  stageImage.addEventListener('pointermove', (event) => {
+    if (!isPanning) return;
+    const dx = event.clientX - pointerStartX;
+    const dy = event.clientY - pointerStartY;
+    if (Math.abs(dx) + Math.abs(dy) > 4) didDrag = true;
+    const wrap = stageImage.parentElement.getBoundingClientRect();
+    const maxX = wrap.width * .62;
+    const maxY = wrap.height * .62;
+    panX = Math.max(-maxX, Math.min(maxX, panStartX + dx));
+    panY = Math.max(-maxY, Math.min(maxY, panStartY + dy));
+    stageImage.style.setProperty('--pan-x', `${panX}px`);
+    stageImage.style.setProperty('--pan-y', `${panY}px`);
+  });
+  function stopPanning(event) {
+    if (!isPanning) return;
+    isPanning = false;
+    stageImage.classList.remove('panning');
+    if (event?.pointerId != null) stageImage.releasePointerCapture?.(event.pointerId);
+  }
+  stageImage.addEventListener('pointerup', stopPanning);
+  stageImage.addEventListener('pointercancel', stopPanning);
   lightbox.addEventListener('touchstart', (event) => {
     touchStartX = event.changedTouches[0].clientX;
   }, { passive: true });
