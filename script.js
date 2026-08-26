@@ -5,7 +5,9 @@ menuButton.addEventListener('click', () => {
   const open = menuButton.getAttribute('aria-expanded') === 'true';
   menuButton.setAttribute('aria-expanded', String(!open));
   menuButton.setAttribute('aria-label', open ? 'Menü öffnen' : 'Menü schließen');
+  menuButton.classList.toggle('is-open', !open);
   navigation.classList.toggle('open', !open);
+  document.querySelector('.nav').classList.toggle('menu-active', !open);
   document.body.classList.toggle('menu-open', !open);
 });
 
@@ -13,23 +15,41 @@ navigation.querySelectorAll('a').forEach((link) => {
   link.addEventListener('click', () => {
     menuButton.setAttribute('aria-expanded', 'false');
     menuButton.setAttribute('aria-label', 'Menü öffnen');
+    menuButton.classList.remove('is-open');
     navigation.classList.remove('open');
+    document.querySelector('.nav').classList.remove('menu-active');
     document.body.classList.remove('menu-open');
   });
 });
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
-    entry.target.classList.add('visible');
-    observer.unobserve(entry.target);
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-
-document.querySelectorAll('.reveal, .reveal-image').forEach((element, index) => {
+const revealElements = [...document.querySelectorAll('.reveal, .reveal-image')];
+revealElements.forEach((element, index) => {
   element.style.setProperty('--delay', `${Math.min(index % 3, 2) * 90}ms`);
-  observer.observe(element);
 });
+
+function revealVisibleElements() {
+  const trigger = window.innerHeight * 0.92;
+  revealElements.forEach((element) => {
+    if (!element.classList.contains('visible') && element.getBoundingClientRect().top < trigger) {
+      element.classList.add('visible');
+    }
+  });
+}
+
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.04, rootMargin: '0px 0px -5% 0px' });
+  revealElements.forEach((element) => observer.observe(element));
+} else {
+  window.addEventListener('scroll', revealVisibleElements, { passive: true });
+}
+
+window.requestAnimationFrame(() => window.requestAnimationFrame(revealVisibleElements));
 
 // Compact glass header: hide while scrolling down, reveal while scrolling up.
 const siteHeader = document.querySelector('.nav');
@@ -64,27 +84,40 @@ if (lightboxImages.length) {
   lightbox.setAttribute('aria-modal', 'true');
   lightbox.setAttribute('aria-label', 'Produktgalerie');
   lightbox.innerHTML = `
-    <button class="lightbox-close" type="button" aria-label="Galerie schließen">Schließen ×</button>
-    <button class="lightbox-arrow lightbox-prev" type="button" aria-label="Vorheriges Bild">←</button>
+    <button class="lightbox-close" type="button" aria-label="Galerie schließen"><span></span><span></span></button>
+    <button class="lightbox-zoom" type="button" aria-label="Bild vergrößern">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m15.5 15.5 5 5"></path><path class="zoom-plus" d="M10.8 7.8v6M7.8 10.8h6"></path></svg>
+    </button>
+    <button class="lightbox-arrow lightbox-prev" type="button" aria-label="Vorheriges Bild"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.5-5 5.5 5 5.5"></path></svg></button>
     <figure class="lightbox-stage">
-      <img src="" alt="">
+      <div class="lightbox-image-wrap"><img src="" alt=""></div>
       <figcaption><span></span><b></b></figcaption>
     </figure>
-    <button class="lightbox-arrow lightbox-next" type="button" aria-label="Nächstes Bild">→</button>`;
+    <button class="lightbox-arrow lightbox-next" type="button" aria-label="Nächstes Bild"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.5 5 5.5-5 5.5"></path></svg></button>`;
   document.body.append(lightbox);
 
   const stageImage = lightbox.querySelector('.lightbox-stage img');
   const stageLabel = lightbox.querySelector('figcaption span');
   const stageCount = lightbox.querySelector('figcaption b');
   const closeButton = lightbox.querySelector('.lightbox-close');
+  const zoomButton = lightbox.querySelector('.lightbox-zoom');
   let activeIndex = 0;
+  let touchStartX = 0;
+
+  function resetZoom() {
+    stageImage.classList.remove('zoomed');
+    zoomButton.classList.remove('active');
+    zoomButton.setAttribute('aria-label', 'Bild vergrößern');
+    stageImage.style.transformOrigin = '50% 50%';
+  }
 
   function showImage(index) {
     activeIndex = (index + lightboxImages.length) % lightboxImages.length;
     const source = lightboxImages[activeIndex];
+    resetZoom();
     stageImage.classList.add('changing');
     window.setTimeout(() => {
-      stageImage.src = source.src;
+      stageImage.src = source.currentSrc || source.src;
       stageImage.alt = source.alt;
       stageLabel.textContent = source.alt;
       stageCount.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(lightboxImages.length).padStart(2, '0')}`;
@@ -121,6 +154,25 @@ if (lightboxImages.length) {
   closeButton.addEventListener('click', closeLightbox);
   lightbox.querySelector('.lightbox-prev').addEventListener('click', () => showImage(activeIndex - 1));
   lightbox.querySelector('.lightbox-next').addEventListener('click', () => showImage(activeIndex + 1));
+  zoomButton.addEventListener('click', () => {
+    const zoomed = stageImage.classList.toggle('zoomed');
+    zoomButton.classList.toggle('active', zoomed);
+    zoomButton.setAttribute('aria-label', zoomed ? 'Bild verkleinern' : 'Bild vergrößern');
+  });
+  stageImage.addEventListener('click', (event) => {
+    const rect = stageImage.getBoundingClientRect();
+    stageImage.style.transformOrigin = `${((event.clientX - rect.left) / rect.width) * 100}% ${((event.clientY - rect.top) / rect.height) * 100}%`;
+    zoomButton.click();
+  });
+  lightbox.addEventListener('touchstart', (event) => {
+    touchStartX = event.changedTouches[0].clientX;
+  }, { passive: true });
+  lightbox.addEventListener('touchend', (event) => {
+    if (stageImage.classList.contains('zoomed')) return;
+    const distance = event.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(distance) < 55) return;
+    showImage(activeIndex + (distance < 0 ? 1 : -1));
+  }, { passive: true });
   lightbox.addEventListener('click', (event) => {
     if (event.target === lightbox) closeLightbox();
   });
