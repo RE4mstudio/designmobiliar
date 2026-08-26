@@ -177,21 +177,21 @@ if (lightboxImages.length) {
       return;
     }
   });
-  panSurface.addEventListener('pointerdown', (event) => {
-    if (!stageImage.classList.contains('zoomed')) return;
+  function startPan(clientX, clientY) {
+    if (!stageImage.classList.contains('zoomed')) return false;
     isPanning = true;
     didDrag = false;
-    pointerStartX = event.clientX;
-    pointerStartY = event.clientY;
+    pointerStartX = clientX;
+    pointerStartY = clientY;
     panStartX = panX;
     panStartY = panY;
-    panSurface.setPointerCapture?.(event.pointerId);
     stageImage.classList.add('panning');
-  });
-  panSurface.addEventListener('pointermove', (event) => {
+    return true;
+  }
+  function movePan(clientX, clientY) {
     if (!isPanning) return;
-    const dx = event.clientX - pointerStartX;
-    const dy = event.clientY - pointerStartY;
+    const dx = clientX - pointerStartX;
+    const dy = clientY - pointerStartY;
     if (Math.abs(dx) + Math.abs(dy) > 4) didDrag = true;
     const wrap = stageImage.parentElement.getBoundingClientRect();
     const maxX = wrap.width * .62;
@@ -200,15 +200,27 @@ if (lightboxImages.length) {
     panY = Math.max(-maxY, Math.min(maxY, panStartY + dy));
     stageImage.style.setProperty('--pan-x', `${panX}px`);
     stageImage.style.setProperty('--pan-y', `${panY}px`);
-  });
-  function stopPanning(event) {
+  }
+  function stopPanning() {
     if (!isPanning) return;
     isPanning = false;
     stageImage.classList.remove('panning');
-    if (event?.pointerId != null) panSurface.releasePointerCapture?.(event.pointerId);
   }
-  panSurface.addEventListener('pointerup', stopPanning);
-  panSurface.addEventListener('pointercancel', stopPanning);
+  panSurface.addEventListener('mousedown', (event) => {
+    if (event.button === 0) startPan(event.clientX, event.clientY);
+  });
+  document.addEventListener('mousemove', (event) => movePan(event.clientX, event.clientY));
+  document.addEventListener('mouseup', stopPanning);
+  panSurface.addEventListener('touchstart', (event) => {
+    if (event.touches.length === 1 && startPan(event.touches[0].clientX, event.touches[0].clientY)) event.preventDefault();
+  }, { passive: false });
+  panSurface.addEventListener('touchmove', (event) => {
+    if (!isPanning || event.touches.length !== 1) return;
+    event.preventDefault();
+    movePan(event.touches[0].clientX, event.touches[0].clientY);
+  }, { passive: false });
+  panSurface.addEventListener('touchend', stopPanning);
+  panSurface.addEventListener('touchcancel', stopPanning);
   lightbox.addEventListener('touchstart', (event) => {
     touchStartX = event.changedTouches[0].clientX;
   }, { passive: true });
