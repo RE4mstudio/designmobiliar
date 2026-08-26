@@ -1,3 +1,7 @@
+const touchQuery = window.matchMedia('(hover: none), (pointer: coarse)');
+const isTouchDevice = touchQuery.matches || 'ontouchstart' in window;
+if (isTouchDevice) document.documentElement.classList.add('touch-device');
+
 const menuButton = document.querySelector('.menu-button');
 const navigation = document.querySelector('#main-nav');
 
