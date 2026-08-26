@@ -81,3 +81,9 @@ html{-webkit-tap-highlight-color:transparent}a,button,summary,[role="button"]{to
 /* Touch devices: no sticky hover, but the same calm timing as desktop */
 .touch-device .button:hover .cta-label>span,.touch-device .text-link:hover .cta-label>span,.touch-device .path:hover .cta-label>span,.touch-device .add-to-cart:hover .cta-label>span{transform:none;opacity:1}.touch-device .button:hover .cta-label>i,.touch-device .text-link:hover .cta-label>i,.touch-device .path:hover .cta-label>i,.touch-device .add-to-cart:hover .cta-label>i{transform:translateY(100%);opacity:0}.touch-device .button:hover .cta-arrow,.touch-device .text-link:hover .cta-arrow,.touch-device .path:hover .cta-arrow,.touch-device .add-to-cart:hover .cta-arrow{transform:none}.touch-device .product:hover img,.touch-device .metro-tile:hover img{transform:none}.touch-device .nav nav a:hover::after{right:100%}.touch-device .reveal,.touch-device .reveal-image{transition-duration:.8s}.touch-device .reveal-image img{transition-duration:1.2s}.touch-device .hero-line{animation-duration:.95s}.touch-device .menu-button span{transition-duration:.42s}.touch-device .nav nav{transition-duration:.5s}.touch-device .lightbox,.touch-device .lightbox-stage img{transition-duration:.35s}
 .touch-device .path:hover{transform:none!important}.touch-device .button:not(.button-light):hover{background:var(--ink);color:#fff}
+
+/* Pan the zoomed image with mouse or finger */
+.lightbox-stage img{transform:translate3d(var(--pan-x,0px),var(--pan-y,0px),0) scale(1);cursor:zoom-in;touch-action:none}.lightbox.open .lightbox-stage img.zoomed{transform:translate3d(var(--pan-x,0px),var(--pan-y,0px),0) scale(2.25);cursor:grab}.lightbox.open .lightbox-stage img.zoomed.panning{cursor:grabbing;transition:none}
+
+/* Unified motion timing */
+*,*::before,*::after{transition-duration:1s!important;animation-duration:1s!important}
