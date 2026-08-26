@@ -93,3 +93,4 @@ html{-webkit-tap-highlight-color:transparent}a,button,summary,[role="button"]{to
 
 /* Lightbox image is edge-to-edge; zoom is controlled only by the top button */
 .lightbox-image-wrap{inset:0}.lightbox-stage figcaption{display:none}.lightbox-stage img{cursor:default}.lightbox.open .lightbox-stage img.zoomed{cursor:grab}
+.lightbox-image-wrap{touch-action:none;user-select:none;-webkit-user-select:none}

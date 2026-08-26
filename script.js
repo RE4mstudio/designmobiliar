@@ -100,6 +100,7 @@ if (lightboxImages.length) {
   document.body.append(lightbox);
 
   const stageImage = lightbox.querySelector('.lightbox-stage img');
+  const panSurface = lightbox.querySelector('.lightbox-image-wrap');
   const closeButton = lightbox.querySelector('.lightbox-close');
   const zoomButton = lightbox.querySelector('.lightbox-zoom');
   let activeIndex = 0;
@@ -176,7 +177,7 @@ if (lightboxImages.length) {
       return;
     }
   });
-  stageImage.addEventListener('pointerdown', (event) => {
+  panSurface.addEventListener('pointerdown', (event) => {
     if (!stageImage.classList.contains('zoomed')) return;
     isPanning = true;
     didDrag = false;
@@ -184,10 +185,10 @@ if (lightboxImages.length) {
     pointerStartY = event.clientY;
     panStartX = panX;
     panStartY = panY;
-    stageImage.setPointerCapture?.(event.pointerId);
+    panSurface.setPointerCapture?.(event.pointerId);
     stageImage.classList.add('panning');
   });
-  stageImage.addEventListener('pointermove', (event) => {
+  panSurface.addEventListener('pointermove', (event) => {
     if (!isPanning) return;
     const dx = event.clientX - pointerStartX;
     const dy = event.clientY - pointerStartY;
@@ -204,10 +205,10 @@ if (lightboxImages.length) {
     if (!isPanning) return;
     isPanning = false;
     stageImage.classList.remove('panning');
-    if (event?.pointerId != null) stageImage.releasePointerCapture?.(event.pointerId);
+    if (event?.pointerId != null) panSurface.releasePointerCapture?.(event.pointerId);
   }
-  stageImage.addEventListener('pointerup', stopPanning);
-  stageImage.addEventListener('pointercancel', stopPanning);
+  panSurface.addEventListener('pointerup', stopPanning);
+  panSurface.addEventListener('pointercancel', stopPanning);
   lightbox.addEventListener('touchstart', (event) => {
     touchStartX = event.changedTouches[0].clientX;
   }, { passive: true });
