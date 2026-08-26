@@ -101,6 +101,10 @@ if (lightboxImages.length) {
 
   const stageImage = lightbox.querySelector('.lightbox-stage img');
   const panSurface = lightbox.querySelector('.lightbox-image-wrap');
+  stageImage.draggable = false;
+  stageImage.setAttribute('draggable', 'false');
+  stageImage.addEventListener('dragstart', (event) => event.preventDefault());
+  lightbox.addEventListener('dragstart', (event) => event.preventDefault(), true);
   const closeButton = lightbox.querySelector('.lightbox-close');
   const zoomButton = lightbox.querySelector('.lightbox-zoom');
   let activeIndex = 0;
@@ -151,6 +155,9 @@ if (lightboxImages.length) {
   }
 
   lightboxImages.forEach((image, index) => {
+    image.draggable = false;
+    image.setAttribute('draggable', 'false');
+    image.addEventListener('dragstart', (event) => event.preventDefault());
     image.tabIndex = 0;
     image.setAttribute('role', 'button');
     image.setAttribute('aria-label', `${image.alt} vergrößern`);
