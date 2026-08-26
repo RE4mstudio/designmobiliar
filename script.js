@@ -95,14 +95,11 @@ if (lightboxImages.length) {
     <button class="lightbox-arrow lightbox-prev" type="button" aria-label="Vorheriges Bild"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.5-5 5.5 5 5.5"></path></svg></button>
     <figure class="lightbox-stage">
       <div class="lightbox-image-wrap"><img src="" alt=""></div>
-      <figcaption><span></span><b></b></figcaption>
     </figure>
     <button class="lightbox-arrow lightbox-next" type="button" aria-label="Nächstes Bild"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.5 5 5.5-5 5.5"></path></svg></button>`;
   document.body.append(lightbox);
 
   const stageImage = lightbox.querySelector('.lightbox-stage img');
-  const stageLabel = lightbox.querySelector('figcaption span');
-  const stageCount = lightbox.querySelector('figcaption b');
   const closeButton = lightbox.querySelector('.lightbox-close');
   const zoomButton = lightbox.querySelector('.lightbox-zoom');
   let activeIndex = 0;
@@ -135,8 +132,6 @@ if (lightboxImages.length) {
     window.setTimeout(() => {
       stageImage.src = source.currentSrc || source.src;
       stageImage.alt = source.alt;
-      stageLabel.textContent = source.alt;
-      stageCount.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(lightboxImages.length).padStart(2, '0')}`;
       stageImage.classList.remove('changing');
     }, 120);
   }
@@ -175,14 +170,11 @@ if (lightboxImages.length) {
     zoomButton.classList.toggle('active', zoomed);
     zoomButton.setAttribute('aria-label', zoomed ? 'Bild verkleinern' : 'Bild vergrößern');
   });
-  stageImage.addEventListener('click', (event) => {
+  stageImage.addEventListener('click', () => {
     if (didDrag) {
       didDrag = false;
       return;
     }
-    const rect = stageImage.getBoundingClientRect();
-    stageImage.style.transformOrigin = `${((event.clientX - rect.left) / rect.width) * 100}% ${((event.clientY - rect.top) / rect.height) * 100}%`;
-    zoomButton.click();
   });
   stageImage.addEventListener('pointerdown', (event) => {
     if (!stageImage.classList.contains('zoomed')) return;

@@ -90,3 +90,6 @@ html{-webkit-tap-highlight-color:transparent}a,button,summary,[role="button"]{to
 
 /* Hover interactions stay quick and responsive */
 .button .cta-label>span,.button .cta-label>i,.text-link .cta-label>span,.text-link .cta-label>i,.path .cta-label>span,.path .cta-label>i,.add-to-cart .cta-label>span,.add-to-cart .cta-label>i,.cta-arrow{transition-duration:.34s!important}.path-grid .path{transition-duration:.45s!important}.product-image img,.metro-tile img{transition-duration:.45s!important}
+
+/* Lightbox image is edge-to-edge; zoom is controlled only by the top button */
+.lightbox-image-wrap{inset:0}.lightbox-stage figcaption{display:none}.lightbox-stage img{cursor:default}.lightbox.open .lightbox-stage img.zoomed{cursor:grab}
