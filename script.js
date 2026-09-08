@@ -249,7 +249,9 @@ if (lightboxImages.length) {
 }
 
 
-// Smooth product-image parallax (works with mouse, touch and reduced-motion settings).
+// Smooth product-image parallax: starts as soon as the image enters the viewport,
+// moves quickly at first and eases gently towards the end. The upward-only
+// translation keeps the image top edge covered at all times (no visible gap).
 const parallaxImages = [...document.querySelectorAll('.product-mood-grid .reveal-image img')];
 if (parallaxImages.length) {
   let parallaxTick = false;
@@ -259,8 +261,10 @@ if (parallaxImages.length) {
     parallaxImages.forEach((image) => {
       const rect = image.parentElement.getBoundingClientRect();
       if (rect.bottom < -120 || rect.top > viewH + 120) return;
-      const offset = ((rect.top + rect.height / 2 - viewH / 2) / viewH) * -42;
-      image.style.setProperty('--parallax-y', offset.toFixed(2) + 'px');
+      const progress = Math.max(0, Math.min(1, (viewH - rect.top) / (viewH + rect.height)));
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const offset = -(easedProgress * 160);
+      image.style.transform = 'translate3d(0,' + offset.toFixed(2) + 'px,0) scale(1.02)';
     });
   };
   const requestParallax = () => { if (!parallaxTick) { parallaxTick = true; requestAnimationFrame(updateParallax); } };
@@ -268,3 +272,64 @@ if (parallaxImages.length) {
   window.addEventListener('resize', requestParallax, { passive: true });
   requestParallax();
 }
+
+// Custom product controls (USM condition and quantity)
+document.querySelectorAll('.condition-selector').forEach((selector) => {
+  const summary = selector.closest('.product-summary');
+  const price = summary?.querySelector('.product-price strong');
+  selector.querySelectorAll('.condition-option').forEach((option) => {
+    option.addEventListener('click', () => {
+      selector.querySelectorAll('.condition-option').forEach((item) => {
+        const selected = item === option;
+        item.classList.toggle('is-selected', selected);
+        item.setAttribute('aria-checked', selected ? 'true' : 'false');
+      });
+      if (price) price.textContent = option.dataset.price || price.textContent;
+    });
+  });
+});
+
+// Upgrade the remaining product-page native quantity selects to the shared custom stepper.
+document.querySelectorAll('.purchase-row select#quantity').forEach((select) => {
+  const stepper = document.createElement('div');
+  stepper.className = 'quantity-stepper';
+  stepper.setAttribute('role', 'group');
+  stepper.setAttribute('aria-label', 'Anzahl');
+  stepper.innerHTML = '<button type="button" class="quantity-button" data-quantity-step="-1" aria-label="Anzahl verringern" disabled>−</button><output class="quantity-value" aria-live="polite">1</output><button type="button" class="quantity-button" data-quantity-step="1" aria-label="Anzahl erhöhen">+</button>';
+  select.replaceWith(stepper);
+  const label = select.closest('.purchase-row')?.querySelector('label[for="quantity"]');
+  if (label) {
+    label.className = 'control-label';
+    label.removeAttribute('for');
+  }
+});
+
+document.querySelectorAll('.quantity-stepper').forEach((stepper) => {
+  const output = stepper.querySelector('.quantity-value');
+  const buttons = stepper.querySelectorAll('[data-quantity-step]');
+  if (!output || !buttons.length) return;
+  let quantity = Math.max(1, Number.parseInt(output.textContent, 10) || 1);
+  const syncQuantity = () => {
+    output.textContent = String(quantity);
+    buttons.forEach((button) => {
+      if (button.dataset.quantityStep === '-1') button.disabled = quantity <= 1;
+    });
+  };
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      quantity = Math.max(1, quantity + Number(button.dataset.quantityStep || 0));
+      syncQuantity();
+    });
+  });
+  syncQuantity();
+});
+
+document.querySelectorAll('.condition-info').forEach((link) => {
+  link.addEventListener('click', (event) => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (!target) return;
+    event.preventDefault();
+    target.open = true;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
