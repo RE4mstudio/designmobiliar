@@ -630,3 +630,67 @@ html{-webkit-tap-highlight-color:transparent}a,button,summary,[role="button"]{to
     gap: 16px !important;
   }
 }
+
+
+/* === UNIFIED PRODUCT DETAILS & TYPOGRAPHY (12PX) === */
+.product-summary details > p,
+.product-summary details .product-copy,
+.product-summary details .product-copy p,
+.product-summary details .product-copy ul,
+.product-summary details .product-copy li,
+.product-summary dl,
+.product-summary dl div,
+.product-summary dt,
+.product-summary dd {
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  color: #62665f !important;
+  font-family: Inter, Arial, Helvetica, sans-serif !important;
+}
+
+.product-summary details summary {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--ink) !important;
+  padding: 18px 0 !important;
+}
+
+.product-summary details .product-copy ul {
+  margin: 8px 0 20px 18px !important;
+  padding: 0 !important;
+}
+
+.product-summary details .product-copy li {
+  margin-bottom: 6px !important;
+}
+
+.product-summary details strong,
+.product-summary dl dt {
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+}
+
+.product-summary dl {
+  margin: 0 !important;
+  padding: 4px 0 20px !important;
+}
+
+.product-summary dl div {
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 7px 0 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+.product-summary dl div:last-child {
+  border-bottom: none !important;
+}
+
+/* Also bring any overly large 16px/17px body copy downstairs down to harmonious scale */
+.product-story > p {
+  font-size: 13px !important;
+  line-height: 1.75 !important;
+  color: #62665f !important;
+}
