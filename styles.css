@@ -690,7 +690,7 @@ html{-webkit-tap-highlight-color:transparent}a,button,summary,[role="button"]{to
 
 /* Also bring any overly large 16px/17px body copy downstairs down to harmonious scale */
 .product-story > p {
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: 1.75 !important;
   color: #62665f !important;
 }
